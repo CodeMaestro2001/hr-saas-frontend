@@ -46,6 +46,10 @@ The backend must explicitly allow the frontend origin. For local development, al
 
 Do not use a wildcard origin when credentials or other sensitive cross-origin behavior is enabled. The access token is sent in the `Authorization` header, so that header and the required HTTP methods must be allowed.
 
+## Vercel deployment
+
+The root `vercel.json` rewrites direct requests such as `/login`, `/dashboard`, and `/attendance` to `index.html`, allowing React Router to resolve the route after a browser refresh. Set `VITE_API_BASE_URL` in the Vercel project environment and redeploy whenever that value changes.
+
 ## Available routes
 
 | Route | Access | Purpose |
