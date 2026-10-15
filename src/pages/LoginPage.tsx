@@ -87,7 +87,7 @@ export function LoginPage() {
             <div className="mb-5 grid size-12 place-items-center rounded-2xl border border-blue-100 bg-blue-50 text-blue-700">
               <LockKeyhole className="size-6" aria-hidden="true" />
             </div>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-950">Welcome back</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-slate-950">Welcome back.</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">Enter your account details to continue.</p>
           </div>
 
