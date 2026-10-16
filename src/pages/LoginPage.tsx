@@ -18,6 +18,11 @@ interface LoginLocationState {
   from?: string
 }
 
+const demoAdminCredentials = {
+  email: 'admin@example.com',
+  password: 'admin123',
+}
+
 export function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -26,6 +31,7 @@ export function LoginPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -89,6 +95,26 @@ export function LoginPage() {
             </div>
             <h2 className="text-3xl font-bold tracking-tight text-slate-950">Welcome back.</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">Enter your account details to continue.</p>
+          </div>
+
+          <div className="mb-5 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-slate-700">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="font-semibold text-blue-950">Demo admin access</p>
+                <p className="mt-1"><span className="font-medium">Email:</span> {demoAdminCredentials.email}</p>
+                <p><span className="font-medium">Password:</span> {demoAdminCredentials.password}</p>
+              </div>
+              <button
+                type="button"
+                className="shrink-0 rounded-lg border border-blue-300 bg-white px-3 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                onClick={() => {
+                  setValue('email', demoAdminCredentials.email, { shouldValidate: true })
+                  setValue('password', demoAdminCredentials.password, { shouldValidate: true })
+                }}
+              >
+                Use demo login
+              </button>
+            </div>
           </div>
 
           {apiError && (
