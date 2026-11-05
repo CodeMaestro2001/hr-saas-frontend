@@ -50,6 +50,14 @@ Do not use a wildcard origin when credentials or other sensitive cross-origin be
 
 The root `vercel.json` rewrites direct requests such as `/login`, `/dashboard`, and `/attendance` to `index.html`, allowing React Router to resolve the route after a browser refresh. Set `VITE_API_BASE_URL` in the Vercel project environment and redeploy whenever that value changes.
 
+The `Frontend CI` GitHub Actions workflow runs typechecking, linting, tests, and a production build for pull requests and pushes to `main`. Vercel remains responsible for deployment through its Git integration: connect `CodeMaestro2001/hr-saas-frontend`, set the production branch to `main`, and configure this production environment variable:
+
+```dotenv
+VITE_API_BASE_URL=https://api-workforce.tharushadev.online/api
+```
+
+Every push to a non-production branch creates a Vercel preview, while a successful Vercel build from `main` updates the live production domain. Keep the GitHub Actions check required on `main` so changes are validated before they are merged.
+
 ## Available routes
 
 | Route | Access | Purpose |
