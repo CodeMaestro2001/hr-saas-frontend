@@ -1,7 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { getCurrentUserRequest, loginRequest } from '../api/auth.api'
-import { setAccessToken, setUnauthorizedHandler } from '../api/client'
+import { loginRequest, logoutRequest, refreshSessionRequest } from '../api/auth.api'
+import {
+  setAccessToken,
+  setTokenRefreshHandler,
+  setUnauthorizedHandler,
+} from '../api/client'
 import type { AuthUser, LoginCredentials } from '../types/auth'
 import { AuthContext, type AuthContextValue } from './auth-context'
 
@@ -12,39 +16,69 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const queryClient = useQueryClient()
   const [user, setUser] = useState<AuthUser | null>(null)
+  const [isInitializing, setIsInitializing] = useState(true)
 
-  const logout = useCallback(() => {
+  const clearSession = useCallback(() => {
     setAccessToken(null)
     setUser(null)
     queryClient.clear()
   }, [queryClient])
 
+  const refreshAccessToken = useCallback(async () => {
+    const session = await refreshSessionRequest()
+    setAccessToken(session.token)
+    setUser(session.user)
+    return session.token
+  }, [])
+
   useEffect(() => {
-    setUnauthorizedHandler(logout)
-    return () => setUnauthorizedHandler(null)
-  }, [logout])
+    let isActive = true
+    setUnauthorizedHandler(clearSession)
+    setTokenRefreshHandler(refreshAccessToken)
+
+    void refreshSessionRequest()
+      .then((session) => {
+        if (!isActive) return
+        setAccessToken(session.token)
+        setUser(session.user)
+      })
+      .catch(() => {
+        if (isActive) clearSession()
+      })
+      .finally(() => {
+        if (isActive) setIsInitializing(false)
+      })
+
+    return () => {
+      isActive = false
+      setUnauthorizedHandler(null)
+      setTokenRefreshHandler(null)
+    }
+  }, [clearSession, refreshAccessToken])
 
   const login = useCallback(async (credentials: LoginCredentials) => {
-    const { token } = await loginRequest(credentials)
-    setAccessToken(token)
+    const session = await loginRequest(credentials)
+    setAccessToken(session.token)
+    setUser(session.user)
+  }, [])
 
+  const logout = useCallback(async () => {
     try {
-      const currentUser = await getCurrentUserRequest()
-      setUser(currentUser)
-    } catch (error) {
-      setAccessToken(null)
-      setUser(null)
-      queryClient.clear()
-      throw error
+      await logoutRequest()
+    } catch {
+      // Local sign-out must still succeed if the API is temporarily unavailable.
+    } finally {
+      clearSession()
     }
-  }, [queryClient])
+  }, [clearSession])
 
   const value = useMemo<AuthContextValue>(() => ({
     user,
     isAuthenticated: user !== null,
+    isInitializing,
     login,
     logout,
-  }), [login, logout, user])
+  }), [isInitializing, login, logout, user])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

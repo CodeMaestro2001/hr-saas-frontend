@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { lazy, Suspense } from 'react'
+import { LoaderCircle } from 'lucide-react'
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { RoleRoute } from './components/auth/RoleRoute'
 import { DashboardSkeleton } from './components/dashboard/DashboardSkeleton'
@@ -20,6 +21,9 @@ const AdminLeavePage = lazy(() => import('./pages/AdminLeavePage').then((module)
 const LeaveDetailsPage = lazy(() => import('./pages/LeaveDetailsPage').then((module) => ({ default: module.LeaveDetailsPage })))
 const AttendancePage = lazy(() => import('./pages/AttendancePage').then((module) => ({ default: module.AttendancePage })))
 const AdminAttendancePage = lazy(() => import('./pages/AdminAttendancePage').then((module) => ({ default: module.AdminAttendancePage })))
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then((module) => ({ default: module.ForgotPasswordPage })))
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then((module) => ({ default: module.ResetPasswordPage })))
+const ChangePasswordPage = lazy(() => import('./pages/ChangePasswordPage').then((module) => ({ default: module.ChangePasswordPage })))
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,8 +35,10 @@ const queryClient = new QueryClient({
 })
 
 function ProtectedRoute() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isInitializing } = useAuth()
   const location = useLocation()
+
+  if (isInitializing) return <SessionLoadingScreen />
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />
@@ -42,7 +48,9 @@ function ProtectedRoute() {
 }
 
 function PublicOnlyRoute() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isInitializing } = useAuth()
+
+  if (isInitializing) return <SessionLoadingScreen />
 
   return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Outlet />
 }
@@ -55,12 +63,15 @@ function App() {
           <Routes>
             <Route element={<PublicOnlyRoute />}>
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/forgot-password" element={<Suspense fallback={<SessionLoadingScreen />}><ForgotPasswordPage /></Suspense>} />
+              <Route path="/reset-password" element={<Suspense fallback={<SessionLoadingScreen />}><ResetPasswordPage /></Suspense>} />
             </Route>
 
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<Suspense fallback={<DashboardSkeleton />}><DashboardPage /></Suspense>} />
                 <Route path="/access-denied" element={<AccessDeniedPage />} />
+                <Route path="/security" element={<Suspense fallback={<DashboardSkeleton />}><ChangePasswordPage /></Suspense>} />
 
                 <Route element={<RoleRoute allowedRoles={['ADMIN']} />}>
                   <Route path="/employees" element={<Suspense fallback={<DashboardSkeleton />}><EmployeesPage /></Suspense>} />
@@ -87,6 +98,17 @@ function App() {
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
+  )
+}
+
+function SessionLoadingScreen() {
+  return (
+    <main className="grid min-h-screen place-items-center bg-slate-50" aria-busy="true" aria-label="Restoring your session">
+      <div className="flex items-center gap-3 text-sm font-medium text-slate-600">
+        <LoaderCircle className="size-5 animate-spin text-blue-600" aria-hidden="true" />
+        Restoring your session…
+      </div>
+    </main>
   )
 }
 

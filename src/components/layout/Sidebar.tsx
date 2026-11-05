@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, CalendarDays, Clock3, LayoutDashboard, UserRound, Users, X } from 'lucide-react'
+import { BriefcaseBusiness, CalendarDays, Clock3, LayoutDashboard, ShieldCheck, UserRound, Users, X } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 
@@ -157,6 +157,18 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               </NavLink>
             </>
           )}
+          <NavLink
+            to="/security"
+            onClick={onClose}
+            className={({ isActive }) =>
+              `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400 ${
+                isActive ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:bg-white/8 hover:text-white'
+              }`
+            }
+          >
+            <ShieldCheck className="size-5" aria-hidden="true" />
+            Account security
+          </NavLink>
         </nav>
 
         <div className="border-t border-white/10 p-5">

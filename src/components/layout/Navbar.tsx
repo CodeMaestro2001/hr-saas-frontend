@@ -31,7 +31,9 @@ export function Navbar({ onOpenSidebar }: NavbarProps) {
                   ? 'Leave request details'
                   : pathname === '/leave-management'
                     ? 'Leave management'
-                    : 'Dashboard'
+                    : pathname === '/security'
+                      ? 'Account security'
+                      : 'Dashboard'
 
   return (
     <header className="sticky top-0 z-30 flex h-18 items-center border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:px-8">
@@ -60,7 +62,7 @@ export function Navbar({ onOpenSidebar }: NavbarProps) {
         </div>
         <button
           type="button"
-          onClick={logout}
+          onClick={() => void logout()}
           className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
         >
           <LogOut className="size-4" aria-hidden="true" />

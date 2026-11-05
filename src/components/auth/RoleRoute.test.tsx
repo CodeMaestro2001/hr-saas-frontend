@@ -10,6 +10,7 @@ const mockUser = (role: 'ADMIN' | 'EMPLOYEE') => {
   vi.mocked(useAuth).mockReturnValue({
     user: { id: 'user-id', email: `${role.toLowerCase()}@example.com`, role },
     isAuthenticated: true,
+    isInitializing: false,
     login: vi.fn(),
     logout: vi.fn(),
   })

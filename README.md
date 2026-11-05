@@ -1,6 +1,6 @@
 # Workforce Management Frontend
 
-A React and TypeScript frontend for the existing Workforce Management API in `D:\hr-managemt`. Phases F1–F5 include JWT authentication, role-aware dashboards, employee management, leave workflows, and attendance tracking.
+A React and TypeScript frontend for the existing Workforce Management API in `D:\hr-managemt`. It includes production session authentication, role-aware dashboards, employee management, leave workflows, and attendance tracking.
 
 ## Requirements
 
@@ -42,7 +42,7 @@ A React and TypeScript frontend for the existing Workforce Management API in `D:
 
 ## CORS requirement
 
-The backend must explicitly allow the frontend origin. For local development, allow `http://localhost:5173`; add the exact deployed frontend origin for production. The current backend inspected during Phase F1 does not configure CORS, so browser login will be blocked until CORS middleware is enabled there.
+The backend must explicitly allow the frontend origin. For local development, allow `http://localhost:5173`; use `https://workforce.tharushadev.online` in production. The API must enable credentialed CORS because the refresh token is an HttpOnly cookie.
 
 Do not use a wildcard origin when credentials or other sensitive cross-origin behavior is enabled. The access token is sent in the `Authorization` header, so that header and the required HTTP methods must be allowed.
 
@@ -63,6 +63,8 @@ Every push to a non-production branch creates a Vercel preview, while a successf
 | Route | Access | Purpose |
 | --- | --- | --- |
 | `/login` | Public | Email/password sign-in |
+| `/forgot-password` | Public | Request a one-time reset link |
+| `/reset-password?token=...` | Public | Choose a new password with a valid reset token |
 | `/dashboard` | Authenticated | Role-aware application shell |
 | `/employees` | ADMIN | Searchable, paginated employee directory |
 | `/employees/new` | ADMIN | Add an employee and login account |
@@ -76,15 +78,17 @@ Every push to a non-production branch creates a Vercel preview, while a successf
 | `/attendance` | EMPLOYEE | Check in/out and review personal attendance |
 | `/attendance-management` | ADMIN | Read-only workforce attendance and employee filtering |
 | `/access-denied` | Authenticated | Permission error explanation |
+| `/security` | Authenticated | Change password and revoke active sessions |
 
 Unknown routes return to the dashboard, which redirects unauthenticated users to login.
 
 ## Authentication behavior
 
-- Login uses `POST /api/auth/login` and verifies the session with `GET /api/auth/me`.
-- The JWT is held in memory only and attached as a Bearer token by the shared Axios client.
-- Refreshing the browser clears the session and requires a new login by design.
-- A `401` response clears the authenticated session; backend error messages and permission failures are shown in a user-friendly form.
+- Login uses `POST /api/auth/login`. The short-lived access JWT is held in memory only and attached as a Bearer token by the shared Axios client.
+- The backend places a rotating refresh token in a `Secure`, `HttpOnly`, `SameSite=Strict` cookie. The app restores the session after a browser refresh without exposing that token to JavaScript.
+- A protected request that receives `401` attempts one shared refresh and retries once. A failed refresh clears local state and returns to sign-in.
+- Logout revokes the current refresh token. Changing or resetting a password revokes all active sessions.
+- Forgot-password responses do not reveal whether an email exists. Reset links are single-use and expire according to backend configuration.
 - Navigation labels reflect the authenticated `ADMIN` or `EMPLOYEE` role. Backend authorization remains the security boundary.
 
 ## Dashboards
@@ -131,10 +135,11 @@ npm run lint
 npm run build
 ```
 
-To verify Phase F5 manually, sign in as an active employee and open `/attendance`. Check in, confirm the open session and local timestamp, then check out and confirm the backend-provided worked time. Move through personal history pages. Sign in as an administrator, open `/attendance-management`, paginate all sessions, and select an employee to use the employee-specific history endpoint. Confirm each role receives the access-denied page for the other role’s attendance route.
+For authentication verification, sign in, refresh a protected page and confirm the session is restored, then sign out and confirm refresh does not restore it. Request a password reset, use the delivered link once, and confirm an old session is rejected. Finally, change the password from `/security` and confirm all sessions return to sign-in.
 
 ## Security notes
 
 - Never place secrets in a `VITE_` variable; Vite exposes these values to the browser.
 - `.env` files are ignored, while `.env.example` is committed as documentation.
-- Passwords and access tokens are not logged or persisted in browser storage.
+- Passwords and access tokens are not logged or persisted in browser storage. Refresh tokens are inaccessible to frontend JavaScript.
+- Production and local custom-domain setups are same-site. Vercel preview domains are cross-site with the production API, so refresh-cookie sessions are supported on the production custom domain rather than preview domains.

@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { AlertCircle, ArrowRight, BriefcaseBusiness, LoaderCircle, LockKeyhole } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 import { useAuth } from '../hooks/useAuth'
 import { getApiErrorMessage } from '../utils/apiError'
@@ -16,11 +16,7 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 interface LoginLocationState {
   from?: string
-}
-
-const demoAdminCredentials = {
-  email: 'admin@example.com',
-  password: 'admin123',
+  passwordChanged?: boolean
 }
 
 export function LoginPage() {
@@ -28,10 +24,10 @@ export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const [apiError, setApiError] = useState<string | null>(null)
+  const locationState = location.state as LoginLocationState | null
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -43,8 +39,7 @@ export function LoginPage() {
 
     try {
       await login(values)
-      const state = location.state as LoginLocationState | null
-      const destination = state?.from?.startsWith('/') ? state.from : '/dashboard'
+      const destination = locationState?.from?.startsWith('/') ? locationState.from : '/dashboard'
       navigate(destination, { replace: true })
     } catch (error) {
       setApiError(getApiErrorMessage(error))
@@ -97,30 +92,16 @@ export function LoginPage() {
             <p className="mt-2 text-sm leading-6 text-slate-600">Enter your account details to continue.</p>
           </div>
 
-          <div className="mb-5 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-slate-700">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="font-semibold text-blue-950">Demo admin access</p>
-                <p className="mt-1"><span className="font-medium">Email:</span> {demoAdminCredentials.email}</p>
-                <p><span className="font-medium">Password:</span> {demoAdminCredentials.password}</p>
-              </div>
-              <button
-                type="button"
-                className="shrink-0 rounded-lg border border-blue-300 bg-white px-3 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-                onClick={() => {
-                  setValue('email', demoAdminCredentials.email, { shouldValidate: true })
-                  setValue('password', demoAdminCredentials.password, { shouldValidate: true })
-                }}
-              >
-                Use demo login
-              </button>
-            </div>
-          </div>
-
           {apiError && (
             <div role="alert" className="mb-5 flex gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
               <AlertCircle className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
               <p>{apiError}</p>
+            </div>
+          )}
+
+          {locationState?.passwordChanged && !apiError && (
+            <div role="status" className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+              Password changed successfully. Sign in again with your new password.
             </div>
           )}
 
@@ -141,7 +122,12 @@ export function LoginPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="mb-2 block text-sm font-semibold text-slate-800">Password</label>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <label htmlFor="password" className="block text-sm font-semibold text-slate-800">Password</label>
+                <Link to="/forgot-password" className="text-xs font-semibold text-blue-700 hover:text-blue-800 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                  Forgot password?
+                </Link>
+              </div>
               <input
                 id="password"
                 type="password"

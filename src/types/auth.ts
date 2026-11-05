@@ -19,3 +19,13 @@ export interface AuthResponse {
 export interface CurrentUserResponse {
   user: AuthUser
 }
+
+export interface ChangePasswordInput {
+  currentPassword: string
+  newPassword: string
+}
+
+export interface ResetPasswordInput {
+  token: string
+  newPassword: string
+}
