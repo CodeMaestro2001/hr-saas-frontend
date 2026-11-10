@@ -14,7 +14,7 @@ function DirectorySkeleton() {
   return (
     <div role="status" aria-label="Loading employees" className="animate-pulse divide-y divide-slate-100">
       {Array.from({ length: 5 }, (_, index) => (
-        <div key={index} className="grid grid-cols-4 gap-6 px-6 py-5">
+        <div key={index} className="grid gap-3 px-4 py-4 sm:grid-cols-4 sm:gap-6 sm:px-6 sm:py-5">
           <div className="h-4 rounded bg-slate-200" />
           <div className="h-4 rounded bg-slate-100" />
           <div className="h-4 rounded bg-slate-100" />
@@ -71,7 +71,7 @@ export function EmployeesPage() {
         </div>
         <Link
           to="/employees/new"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 sm:w-auto"
         >
           <Plus className="size-4" aria-hidden="true" />
           Add employee
@@ -110,7 +110,31 @@ export function EmployeesPage() {
           </div>
         ) : data && data.data.length > 0 ? (
           <>
-            <div className="overflow-x-auto">
+            <div className="divide-y divide-slate-100 md:hidden">
+              {data.data.map((employee) => (
+                <article key={employee.id} className="space-y-4 px-4 py-5">
+                  <div>
+                    <p className="font-semibold text-slate-900">{employee.fullName}</p>
+                    <p className="mt-1 break-all text-xs text-slate-500">{employee.email}</p>
+                  </div>
+                  <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                    <div>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Department</dt>
+                      <dd className="mt-1 text-slate-700">{employee.department}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Job title</dt>
+                      <dd className="mt-1 text-slate-700">{employee.jobTitle}</dd>
+                    </div>
+                  </dl>
+                  <div className="flex items-center justify-between gap-4 border-t border-slate-100 pt-4">
+                    <EmployeeStatusBadge isActive={employee.isActive} />
+                    <Link to={`/employees/${employee.id}`} className="text-sm font-semibold text-blue-700 hover:text-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">View details</Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full min-w-180 border-collapse text-left">
                 <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
                   <tr>

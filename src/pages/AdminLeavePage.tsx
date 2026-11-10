@@ -66,13 +66,13 @@ export function AdminLeavePage() {
 
       {notice && <div role="status" className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{notice}</div>}
 
-      <div className="mt-7 flex items-center gap-3">
+      <div className="mt-7 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-3">
         <label htmlFor="leave-status-filter" className="text-sm font-semibold text-slate-700">Status</label>
         <select
           id="leave-status-filter"
           value={status ?? ''}
           onChange={(event) => changeStatus(event.target.value)}
-          className="rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+          className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 sm:w-auto"
         >
           {statusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
@@ -88,7 +88,45 @@ export function AdminLeavePage() {
           <div className="p-5"><DashboardError message={getApiErrorMessage(leavesQuery.error)} onRetry={() => void leavesQuery.refetch()} /></div>
         ) : data && data.data.length > 0 ? (
           <>
-            <div className="overflow-x-auto">
+            <div className="divide-y divide-slate-100 md:hidden">
+              {data.data.map((leave) => (
+                <article key={leave.id} className="space-y-4 px-4 py-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-slate-900">{leave.employee.fullName}</p>
+                      <p className="mt-1 text-xs text-slate-500">{leave.employee.department}</p>
+                    </div>
+                    <LeaveStatusBadge status={leave.status} />
+                  </div>
+                  <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                    <div>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Leave type</dt>
+                      <dd className="mt-1 text-slate-700">{formatLeaveType(leave.leaveType)}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Dates</dt>
+                      <dd className="mt-1 text-slate-700">{formatDateOnly(leave.startDate)} – {formatDateOnly(leave.endDate)}</dd>
+                    </div>
+                  </dl>
+                  <div className="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4">
+                    <Link to={`/leave-management/${leave.id}`} className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                      <Eye className="size-4" aria-hidden="true" /> View
+                    </Link>
+                    {leave.status === 'PENDING' && (
+                      <>
+                        <button type="button" onClick={() => setSelectedAction({ leave, action: 'approve' })} className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
+                          <Check className="size-4" aria-hidden="true" /> Approve
+                        </button>
+                        <button type="button" onClick={() => setSelectedAction({ leave, action: 'reject' })} className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">
+                          <X className="size-4" aria-hidden="true" /> Reject
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full min-w-220 border-collapse text-left">
                 <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
                   <tr>

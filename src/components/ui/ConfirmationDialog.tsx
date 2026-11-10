@@ -44,13 +44,13 @@ export function ConfirmationDialog({
   const isPositive = tone === 'positive'
 
   return (
-    <div className="fixed inset-0 z-60 grid place-items-center bg-slate-950/50 px-4 backdrop-blur-sm" role="presentation">
+    <div className="fixed inset-0 z-60 grid items-end bg-slate-950/50 p-3 backdrop-blur-sm sm:place-items-center sm:p-4" role="presentation">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirmation-title"
         aria-describedby="confirmation-description"
-        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+        className="max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl sm:max-h-[calc(100dvh-2rem)] sm:p-6"
       >
         <div className="flex items-start justify-between gap-4">
           <span className={`grid size-11 shrink-0 place-items-center rounded-xl ${isPositive ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>

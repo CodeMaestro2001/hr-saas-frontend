@@ -10,9 +10,9 @@ export function AppLayout() {
     <div className="min-h-screen bg-slate-50">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-      <div className="lg:pl-64">
+      <div className="min-w-0 lg:pl-64">
         <Navbar onOpenSidebar={() => setIsSidebarOpen(true)} />
-        <main className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <main className="min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           <div className="mx-auto max-w-7xl">
             <Outlet />
           </div>

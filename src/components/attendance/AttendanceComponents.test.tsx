@@ -26,9 +26,9 @@ const record: AttendanceRecord = {
 describe('attendance UI components', () => {
   it('renders backend workedMinutes for an overnight session', () => {
     render(<AttendanceTable records={[record]} showEmployee />)
-    expect(screen.getByText('2 hr 30 min')).toBeInTheDocument()
-    expect(screen.getByText('Nimal Perera')).toBeInTheDocument()
-    expect(screen.getByText('Completed')).toBeInTheDocument()
+    expect(screen.getAllByText('2 hr 30 min')).toHaveLength(2)
+    expect(screen.getAllByText('Nimal Perera')).toHaveLength(2)
+    expect(screen.getAllByText('Completed')).toHaveLength(2)
   })
 
   it('shows an open session as checked in and offers checkout', () => {

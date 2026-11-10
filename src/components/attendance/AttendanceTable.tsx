@@ -29,7 +29,42 @@ export function AttendanceTable({
   }
 
   return (
-    <div className="overflow-x-auto">
+    <>
+      <div className="divide-y divide-slate-100 md:hidden">
+        {records.map((record) => (
+          <article key={record.id} className="space-y-4 px-4 py-5">
+            {showEmployee && (
+              <div>
+                <p className="font-semibold text-slate-900">{record.employee.fullName}</p>
+                <p className="mt-1 text-xs text-slate-500">{record.employee.department} · {record.employee.jobTitle}</p>
+              </div>
+            )}
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm">
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Check in</dt>
+                <dd className="mt-1 font-medium text-slate-800">{formatDateTime(record.checkInTime)}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Check out</dt>
+                <dd className="mt-1 font-medium text-slate-800">{record.checkOutTime ? formatDateTime(record.checkOutTime) : <span className="text-emerald-700">Open session</span>}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Worked time</dt>
+                <dd className="mt-1"><WorkingHoursDisplay workedMinutes={record.workedMinutes} /></dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Status</dt>
+                <dd className="mt-1">
+                  <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${record.checkOutTime ? 'bg-slate-100 text-slate-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                    {record.checkOutTime ? 'Completed' : 'In progress'}
+                  </span>
+                </dd>
+              </div>
+            </dl>
+          </article>
+        ))}
+      </div>
+      <div className="hidden overflow-x-auto md:block">
       <table className="w-full min-w-180 border-collapse text-left">
         <caption className="sr-only">Attendance sessions. Times are shown in your local time zone.</caption>
         <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -64,6 +99,7 @@ export function AttendanceTable({
           ))}
         </tbody>
       </table>
-    </div>
+      </div>
+    </>
   )
 }
