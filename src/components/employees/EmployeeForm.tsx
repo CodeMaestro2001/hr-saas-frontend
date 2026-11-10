@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { LoaderCircle, Save } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import { useUnsavedChanges } from '../../hooks/useUnsavedChanges'
 import type { CreateEmployeeInput, Employee, UpdateEmployeeInput } from '../../types/workforce'
 import {
   employeeFormSchema,
@@ -14,7 +15,7 @@ interface EmployeeFormProps {
   isSubmitting: boolean
   apiError?: string | null
   successMessage?: string | null
-  onSubmit: (input: CreateEmployeeInput | UpdateEmployeeInput) => Promise<void>
+  onSubmit: (input: CreateEmployeeInput | UpdateEmployeeInput) => Promise<void | boolean>
 }
 
 interface FormFieldProps {
@@ -47,7 +48,8 @@ export function EmployeeForm({
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
+    reset,
   } = useForm<EmployeeFormInput, unknown, EmployeeFormValues>({
     resolver: zodResolver(employeeFormSchema),
     defaultValues: mode === 'create'
@@ -70,6 +72,7 @@ export function EmployeeForm({
           hireDate: employee?.hireDate.slice(0, 10) ?? '',
         },
   })
+  useUnsavedChanges(isDirty && !isSubmitting)
 
   const submit = handleSubmit(async (values) => {
     const commonValues: UpdateEmployeeInput = {
@@ -80,9 +83,10 @@ export function EmployeeForm({
       hireDate: values.hireDate,
     }
 
-    await onSubmit(values.mode === 'create'
+    const succeeded = await onSubmit(values.mode === 'create'
       ? { ...commonValues, password: values.password }
       : commonValues)
+    if (succeeded !== false) reset(values)
   })
 
   return (

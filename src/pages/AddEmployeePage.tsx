@@ -6,10 +6,12 @@ import { createEmployee } from '../api/employees.api'
 import { EmployeeForm } from '../components/employees/EmployeeForm'
 import type { CreateEmployeeInput, UpdateEmployeeInput } from '../types/workforce'
 import { getApiErrorMessage } from '../utils/apiError'
+import { useToast } from '../hooks/useToast'
 
 export function AddEmployeePage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { showToast } = useToast()
   const [apiError, setApiError] = useState<string | null>(null)
   const mutation = useMutation({ mutationFn: createEmployee })
 
@@ -19,14 +21,19 @@ export function AddEmployeePage() {
       const employee = await mutation.mutateAsync(input as CreateEmployeeInput)
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['employees'] }),
-        queryClient.invalidateQueries({ queryKey: ['dashboard', 'admin', 'employees'] }),
+        queryClient.invalidateQueries({ queryKey: ['dashboard', 'admin'] }),
       ])
+      showToast({ title: 'Employee added', description: `${employee.fullName} can now sign in.`, tone: 'success' })
       navigate(`/employees/${employee.id}`, {
         replace: true,
         state: { notice: `${employee.fullName} was added successfully.` },
       })
+      return true
     } catch (error) {
-      setApiError(getApiErrorMessage(error))
+      const message = getApiErrorMessage(error)
+      setApiError(message)
+      showToast({ title: 'Employee could not be added', description: message, tone: 'error' })
+      return false
     }
   }
 

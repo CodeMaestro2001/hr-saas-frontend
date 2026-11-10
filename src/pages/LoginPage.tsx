@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { AlertCircle, ArrowRight, BriefcaseBusiness, LoaderCircle, LockKeyhole } from 'lucide-react'
+import { AlertCircle, ArrowRight, BriefcaseBusiness, Eye, LoaderCircle, LockKeyhole } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -20,10 +20,11 @@ interface LoginLocationState {
 }
 
 export function LoginPage() {
-  const { login } = useAuth()
+  const { demoLogin, login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [apiError, setApiError] = useState<string | null>(null)
+  const [isDemoSubmitting, setIsDemoSubmitting] = useState(false)
   const locationState = location.state as LoginLocationState | null
   const {
     register,
@@ -45,6 +46,19 @@ export function LoginPage() {
       setApiError(getApiErrorMessage(error))
     }
   })
+
+  const openDemo = async () => {
+    setApiError(null)
+    setIsDemoSubmitting(true)
+    try {
+      await demoLogin()
+      navigate('/dashboard', { replace: true })
+    } catch (error) {
+      setApiError(getApiErrorMessage(error))
+    } finally {
+      setIsDemoSubmitting(false)
+    }
+  }
 
   return (
     <main className="grid min-h-screen bg-white lg:grid-cols-[minmax(0,1fr)_minmax(28rem,0.8fr)]">
@@ -160,7 +174,26 @@ export function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-8 text-center text-xs leading-5 text-slate-500">
+          <div className="my-6 flex items-center gap-3" aria-hidden="true">
+            <span className="h-px flex-1 bg-slate-200" />
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-400">or</span>
+            <span className="h-px flex-1 bg-slate-200" />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => void openDemo()}
+            disabled={isSubmitting || isDemoSubmitting}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-65"
+          >
+            {isDemoSubmitting ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
+            {isDemoSubmitting ? 'Opening demo…' : 'Explore employee demo'}
+          </button>
+          <p className="mt-2 text-center text-xs leading-5 text-slate-500">
+            Public demo workspace for portfolio reviewers. No credentials required.
+          </p>
+
+          <p className="mt-6 text-center text-xs leading-5 text-slate-500">
             Contact your administrator if you need help accessing your account.
           </p>
         </div>

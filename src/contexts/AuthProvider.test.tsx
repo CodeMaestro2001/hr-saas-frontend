@@ -8,6 +8,7 @@ import { AuthProvider } from './AuthProvider'
 
 vi.mock('../api/auth.api', () => ({
   loginRequest: vi.fn(),
+  demoLoginRequest: vi.fn(),
   logoutRequest: vi.fn(),
   refreshSessionRequest: vi.fn(),
 }))

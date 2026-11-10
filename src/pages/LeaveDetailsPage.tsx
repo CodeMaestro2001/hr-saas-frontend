@@ -10,6 +10,7 @@ import { LeaveRequestDetails } from '../components/leaves/LeaveRequestDetails'
 import { useAuth } from '../hooks/useAuth'
 import type { LeaveRequest } from '../types/workforce'
 import { getApiErrorMessage } from '../utils/apiError'
+import { useToast } from '../hooks/useToast'
 
 interface DetailsLocationState {
   notice?: string
@@ -19,6 +20,7 @@ export function LeaveDetailsPage() {
   const { leaveId = '' } = useParams()
   const { user } = useAuth()
   const location = useLocation()
+  const { showToast } = useToast()
   const isAdmin = user?.role === 'ADMIN'
   const backPath = isAdmin ? '/leave-management' : '/leaves'
   const [notice, setNotice] = useState<string | null>((location.state as DetailsLocationState | null)?.notice ?? null)
@@ -77,6 +79,7 @@ export function LeaveDetailsPage() {
           setSelectedAction(null)
           const outcome = action === 'cancel' ? 'cancelled' : action === 'approve' ? 'approved' : 'rejected'
           setNotice(`Leave request was ${outcome}.`)
+          showToast({ title: `Leave request ${outcome}`, tone: 'success' })
         }}
       />
     </div>

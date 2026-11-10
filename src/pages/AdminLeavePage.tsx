@@ -10,6 +10,7 @@ import { Pagination } from '../components/ui/Pagination'
 import type { LeaveRequest, LeaveStatus } from '../types/workforce'
 import { getApiErrorMessage } from '../utils/apiError'
 import { formatDateOnly, formatLeaveType } from '../utils/dashboard'
+import { useToast } from '../hooks/useToast'
 
 const PAGE_SIZE = 10
 const statusOptions: Array<{ value: '' | LeaveStatus; label: string }> = [
@@ -22,6 +23,7 @@ const statusOptions: Array<{ value: '' | LeaveStatus; label: string }> = [
 
 export function AdminLeavePage() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { showToast } = useToast()
   const pageParam = Number(searchParams.get('page') ?? '1')
   const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1
   const rawStatus = searchParams.get('status')
@@ -147,6 +149,7 @@ export function AdminLeavePage() {
         onSuccess={(leave, action) => {
           setSelectedAction(null)
           setNotice(`${leave.employee.fullName}'s request was ${action === 'approve' ? 'approved' : 'rejected'}.`)
+          showToast({ title: `Leave ${action === 'approve' ? 'approved' : 'rejected'}`, description: leave.employee.fullName, tone: 'success' })
         }}
       />
     </div>

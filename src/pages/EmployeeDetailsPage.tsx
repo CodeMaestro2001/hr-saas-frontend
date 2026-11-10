@@ -10,6 +10,7 @@ import { EmployeeProfileDetails } from '../components/employees/EmployeeProfileD
 import { ConfirmationDialog } from '../components/ui/ConfirmationDialog'
 import type { CreateEmployeeInput, UpdateEmployeeInput } from '../types/workforce'
 import { getApiErrorMessage } from '../utils/apiError'
+import { useToast } from '../hooks/useToast'
 
 interface DetailsLocationState {
   notice?: string
@@ -19,6 +20,7 @@ export function EmployeeDetailsPage() {
   const { employeeId = '' } = useParams()
   const location = useLocation()
   const queryClient = useQueryClient()
+  const { showToast } = useToast()
   const initialNotice = (location.state as DetailsLocationState | null)?.notice ?? null
   const [notice, setNotice] = useState<string | null>(initialNotice)
   const [editError, setEditError] = useState<string | null>(null)
@@ -40,7 +42,7 @@ export function EmployeeDetailsPage() {
   const refreshEmployeeQueries = async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ['employees'] }),
-      queryClient.invalidateQueries({ queryKey: ['dashboard', 'admin', 'employees'] }),
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'admin'] }),
     ])
   }
 
@@ -52,8 +54,11 @@ export function EmployeeDetailsPage() {
       queryClient.setQueryData(['employees', 'detail', employeeId], employee)
       await refreshEmployeeQueries()
       setNotice('Employee details were updated successfully.')
+      showToast({ title: 'Employee updated', description: `${employee.fullName}'s details were saved.`, tone: 'success' })
+      return true
     } catch (error) {
       setEditError(getApiErrorMessage(error))
+      return false
     }
   }
 
@@ -65,6 +70,7 @@ export function EmployeeDetailsPage() {
       await refreshEmployeeQueries()
       setIsConfirmingDeactivate(false)
       setNotice(`${employee.fullName} was deactivated.`)
+      showToast({ title: 'Employee deactivated', description: `${employee.fullName} can no longer sign in.`, tone: 'success' })
     } catch (error) {
       setDeactivateError(getApiErrorMessage(error))
     }

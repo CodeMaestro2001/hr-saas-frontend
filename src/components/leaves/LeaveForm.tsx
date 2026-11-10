@@ -1,13 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { LoaderCircle, Send } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import { useUnsavedChanges } from '../../hooks/useUnsavedChanges'
 import type { CreateLeaveInput } from '../../types/workforce'
 import { leaveFormSchema, type LeaveFormInput, type LeaveFormValues } from '../../validation/leave'
 
 interface LeaveFormProps {
   isSubmitting: boolean
   apiError?: string | null
-  onSubmit: (input: CreateLeaveInput) => Promise<void>
+  onSubmit: (input: CreateLeaveInput) => Promise<void | boolean>
 }
 
 const inputClasses = 'w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100 disabled:bg-slate-50 disabled:text-slate-500'
@@ -16,7 +17,8 @@ export function LeaveForm({ isSubmitting, apiError, onSubmit }: LeaveFormProps) 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
+    reset,
   } = useForm<LeaveFormInput, unknown, LeaveFormValues>({
     resolver: zodResolver(leaveFormSchema),
     defaultValues: {
@@ -26,9 +28,15 @@ export function LeaveForm({ isSubmitting, apiError, onSubmit }: LeaveFormProps) 
       reason: '',
     },
   })
+  useUnsavedChanges(isDirty && !isSubmitting)
+
+  const submit = handleSubmit(async (values) => {
+    const succeeded = await onSubmit(values)
+    if (succeeded !== false) reset(values)
+  })
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
+    <form onSubmit={submit} noValidate className="space-y-6">
       {apiError && (
         <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
           {apiError}

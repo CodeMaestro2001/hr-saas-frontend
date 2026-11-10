@@ -10,6 +10,7 @@ import { Pagination } from '../components/ui/Pagination'
 import { getApiErrorMessage } from '../utils/apiError'
 import { invalidateAttendanceQueries } from '../utils/attendanceQueries'
 import { getAttendanceState } from '../utils/dashboard'
+import { useToast } from '../hooks/useToast'
 
 const PAGE_SIZE = 10
 
@@ -24,6 +25,7 @@ function AttendanceTableSkeleton() {
 
 export function AttendancePage() {
   const queryClient = useQueryClient()
+  const { showToast } = useToast()
   const [searchParams, setSearchParams] = useSearchParams()
   const pageParam = Number(searchParams.get('page') ?? '1')
   const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1
@@ -42,9 +44,11 @@ export function AttendancePage() {
     mutationFn: (action: 'check-in' | 'check-out') => action === 'check-in' ? checkIn() : checkOut(),
     onSuccess: async (_, action) => {
       setNotice(action === 'check-in' ? 'You are checked in.' : 'You are checked out.')
+      showToast({ title: action === 'check-in' ? 'Checked in' : 'Checked out', tone: 'success' })
       await invalidateAttendanceQueries(queryClient)
     },
     onError: async () => {
+      showToast({ title: 'Attendance action failed', description: 'Review the error and try again.', tone: 'error' })
       await invalidateAttendanceQueries(queryClient)
     },
   })

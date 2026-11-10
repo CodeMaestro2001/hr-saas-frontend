@@ -6,6 +6,7 @@ import { RoleRoute } from './components/auth/RoleRoute'
 import { DashboardSkeleton } from './components/dashboard/DashboardSkeleton'
 import { AppLayout } from './components/layout/AppLayout'
 import { AuthProvider } from './contexts/AuthProvider'
+import { ToastProvider } from './contexts/ToastProvider'
 import { useAuth } from './hooks/useAuth'
 import { AccessDeniedPage } from './pages/AccessDeniedPage'
 import { LoginPage } from './pages/LoginPage'
@@ -59,7 +60,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
           <Routes>
             <Route element={<PublicOnlyRoute />}>
               <Route path="/login" element={<LoginPage />} />
@@ -95,7 +97,8 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
-        </AuthProvider>
+          </AuthProvider>
+        </ToastProvider>
       </BrowserRouter>
     </QueryClientProvider>
   )

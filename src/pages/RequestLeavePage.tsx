@@ -8,10 +8,12 @@ import type { CreateLeaveInput } from '../types/workforce'
 import { getApiErrorMessage } from '../utils/apiError'
 import { formatLeaveType } from '../utils/dashboard'
 import { invalidateLeaveQueries } from '../utils/leaveQueries'
+import { useToast } from '../hooks/useToast'
 
 export function RequestLeavePage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { showToast } = useToast()
   const [apiError, setApiError] = useState<string | null>(null)
   const mutation = useMutation({ mutationFn: createLeave })
 
@@ -20,12 +22,17 @@ export function RequestLeavePage() {
     try {
       const leave = await mutation.mutateAsync(input)
       await invalidateLeaveQueries(queryClient)
+      showToast({ title: 'Leave request submitted', description: formatLeaveType(leave.leaveType), tone: 'success' })
       navigate(`/leaves/${leave.id}`, {
         replace: true,
         state: { notice: `${formatLeaveType(leave.leaveType)} request was submitted.` },
       })
+      return true
     } catch (error) {
-      setApiError(getApiErrorMessage(error))
+      const message = getApiErrorMessage(error)
+      setApiError(message)
+      showToast({ title: 'Leave request failed', description: message, tone: 'error' })
+      return false
     }
   }
 

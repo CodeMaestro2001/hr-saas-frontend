@@ -21,6 +21,11 @@ export async function loginRequest(credentials: LoginCredentials) {
   return response.data
 }
 
+export async function demoLoginRequest() {
+  const response = await sessionClient.post<AuthResponse>('/auth/demo')
+  return response.data
+}
+
 export function refreshSessionRequest() {
   refreshPromise ??= sessionClient
     .post<AuthResponse>('/auth/refresh')
