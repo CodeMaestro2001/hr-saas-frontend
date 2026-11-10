@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { demoLoginRequest, loginRequest, logoutRequest, refreshSessionRequest } from '../api/auth.api'
+import { demoAdminLoginRequest, demoLoginRequest, loginRequest, logoutRequest, refreshSessionRequest } from '../api/auth.api'
 import {
   setAccessToken,
   setTokenRefreshHandler,
@@ -68,6 +68,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(session.user)
   }, [])
 
+  const demoAdminLogin = useCallback(async () => {
+    const session = await demoAdminLoginRequest()
+    setAccessToken(session.token)
+    setUser(session.user)
+  }, [])
+
   const logout = useCallback(async () => {
     try {
       await logoutRequest()
@@ -84,8 +90,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isInitializing,
     login,
     demoLogin,
+    demoAdminLogin,
     logout,
-  }), [demoLogin, isInitializing, login, logout, user])
+  }), [demoAdminLogin, demoLogin, isInitializing, login, logout, user])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

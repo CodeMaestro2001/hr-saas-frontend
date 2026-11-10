@@ -13,6 +13,7 @@ const mockUser = (role: 'ADMIN' | 'EMPLOYEE') => {
     isInitializing: false,
     login: vi.fn(),
     demoLogin: vi.fn(),
+    demoAdminLogin: vi.fn(),
     logout: vi.fn(),
   })
 }

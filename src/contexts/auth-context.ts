@@ -7,6 +7,7 @@ export interface AuthContextValue {
   isInitializing: boolean
   login: (credentials: LoginCredentials) => Promise<void>
   demoLogin: () => Promise<void>
+  demoAdminLogin: () => Promise<void>
   logout: () => Promise<void>
 }
 

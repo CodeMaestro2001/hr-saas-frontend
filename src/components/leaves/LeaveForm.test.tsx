@@ -39,7 +39,7 @@ describe('LeaveForm', () => {
       startDate: '2026-11-02',
       endDate: '2026-11-04',
       reason: 'Medical recovery',
-    }, expect.anything())
+    })
   })
 
   it('shows overlapping-request errors from the API', () => {

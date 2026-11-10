@@ -26,6 +26,11 @@ export async function demoLoginRequest() {
   return response.data
 }
 
+export async function demoAdminLoginRequest() {
+  const response = await sessionClient.post<AuthResponse>('/auth/demo-admin')
+  return response.data
+}
+
 export function refreshSessionRequest() {
   refreshPromise ??= sessionClient
     .post<AuthResponse>('/auth/refresh')

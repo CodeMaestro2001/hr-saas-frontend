@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { AlertCircle, ArrowRight, BriefcaseBusiness, Eye, LoaderCircle, LockKeyhole } from 'lucide-react'
+import { AlertCircle, ArrowRight, BriefcaseBusiness, Eye, LoaderCircle, LockKeyhole, ShieldCheck } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -20,11 +20,11 @@ interface LoginLocationState {
 }
 
 export function LoginPage() {
-  const { demoLogin, login } = useAuth()
+  const { demoAdminLogin, demoLogin, login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [apiError, setApiError] = useState<string | null>(null)
-  const [isDemoSubmitting, setIsDemoSubmitting] = useState(false)
+  const [demoRole, setDemoRole] = useState<'employee' | 'admin' | null>(null)
   const locationState = location.state as LoginLocationState | null
   const {
     register,
@@ -47,16 +47,16 @@ export function LoginPage() {
     }
   })
 
-  const openDemo = async () => {
+  const openDemo = async (role: 'employee' | 'admin') => {
     setApiError(null)
-    setIsDemoSubmitting(true)
+    setDemoRole(role)
     try {
-      await demoLogin()
+      await (role === 'employee' ? demoLogin() : demoAdminLogin())
       navigate('/dashboard', { replace: true })
     } catch (error) {
       setApiError(getApiErrorMessage(error))
     } finally {
-      setIsDemoSubmitting(false)
+      setDemoRole(null)
     }
   }
 
@@ -182,12 +182,21 @@ export function LoginPage() {
 
           <button
             type="button"
-            onClick={() => void openDemo()}
-            disabled={isSubmitting || isDemoSubmitting}
+            onClick={() => void openDemo('employee')}
+            disabled={isSubmitting || demoRole !== null}
             className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-65"
           >
-            {isDemoSubmitting ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
-            {isDemoSubmitting ? 'Opening demo…' : 'Explore employee demo'}
+            {demoRole === 'employee' ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
+            {demoRole === 'employee' ? 'Opening demo…' : 'Explore employee demo'}
+          </button>
+          <button
+            type="button"
+            onClick={() => void openDemo('admin')}
+            disabled={isSubmitting || demoRole !== null}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-800 transition hover:border-violet-300 hover:bg-violet-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:cursor-not-allowed disabled:opacity-65"
+          >
+            {demoRole === 'admin' ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : <ShieldCheck className="size-4" aria-hidden="true" />}
+            {demoRole === 'admin' ? 'Opening demo…' : 'Explore admin demo'}
           </button>
           <p className="mt-2 text-center text-xs leading-5 text-slate-500">
             Public demo workspace for portfolio reviewers. No credentials required.

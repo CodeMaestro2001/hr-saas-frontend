@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { checkIn, checkOut, getMyAttendance, getMyTodayAttendance } from '../api/attendance.api'
+import { ToastProvider } from '../contexts/ToastProvider'
 import type { AttendanceRecord } from '../types/workforce'
 import { AttendancePage } from './AttendancePage'
 
@@ -41,7 +42,9 @@ function renderPage(today: AttendanceRecord[] = []) {
   const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
   render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter><AttendancePage /></MemoryRouter>
+      <ToastProvider>
+        <MemoryRouter><AttendancePage /></MemoryRouter>
+      </ToastProvider>
     </QueryClientProvider>,
   )
   return invalidateSpy
@@ -55,7 +58,7 @@ describe('AttendancePage actions', () => {
     const invalidateSpy = renderPage()
     await userEvent.setup().click(await screen.findByRole('button', { name: 'Check in' }))
     expect(checkIn).toHaveBeenCalledWith()
-    expect(await screen.findByRole('status')).toHaveTextContent('You are checked in.')
+    expect(await screen.findByText('You are checked in.')).toBeInTheDocument()
     await waitFor(() => expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['attendance'] }))
   })
 
@@ -64,7 +67,7 @@ describe('AttendancePage actions', () => {
     renderPage([openRecord])
     await userEvent.setup().click(await screen.findByRole('button', { name: 'Check out' }))
     expect(checkOut).toHaveBeenCalledWith()
-    expect(await screen.findByRole('status')).toHaveTextContent('You are checked out.')
+    expect(await screen.findByText('You are checked out.')).toBeInTheDocument()
   })
 
   it('shows the backend 409 message and refreshes stale state', async () => {
@@ -74,7 +77,7 @@ describe('AttendancePage actions', () => {
     })
     const invalidateSpy = renderPage()
     await userEvent.setup().click(await screen.findByRole('button', { name: 'Check in' }))
-    expect(await screen.findByRole('alert')).toHaveTextContent('Employee already has an open attendance session')
+    expect(await screen.findByText('Employee already has an open attendance session')).toBeInTheDocument()
     await waitFor(() => expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['attendance'] }))
   })
 
@@ -85,6 +88,6 @@ describe('AttendancePage actions', () => {
     })
     renderPage()
     await userEvent.setup().click(await screen.findByRole('button', { name: 'Check in' }))
-    expect(await screen.findByRole('alert')).toHaveTextContent('You do not have permission to perform this action.')
+    expect(await screen.findByText('You do not have permission to perform this action.')).toBeInTheDocument()
   })
 })
